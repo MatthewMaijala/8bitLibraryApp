@@ -4,6 +4,14 @@ import auth
 from tkinter import messagebox, ttk
 import hashlib
 import datetime, os
+from db import get_connection
+
+# Check connection to the database
+conn = get_connection()
+if conn.is_connected():
+    print("Connected to the database")
+else:
+    print("Failed to connect to the database")
 
 # opens new window
 window = tk.Tk()
