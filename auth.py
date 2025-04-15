@@ -1,2 +1,2 @@
-# File to handle authentication
-# and authorization of users
+username = None
+is_admin = False
