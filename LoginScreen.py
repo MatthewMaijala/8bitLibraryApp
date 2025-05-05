@@ -1,11 +1,18 @@
 
 import tkinter as tink
 from tkinter import messagebox
+from tkinter import ttk
 import auth
-import importlib
 import subprocess
 import sys
-import os
+import importlib
+import ViewTables
+import SearchBooks
+import CheckoutBook
+import ReturnBook
+import MemberView
+import mysql.connector
+import logging
 
 #----------------------------------------- Button test
 # #def update_label():
@@ -26,8 +33,14 @@ import os
 
 
 #makes the window
-usersFile = "DatabaseAccounts.txt"
+logging.basicConfig(
+    filename="user_activity.log",
+    level=logging.INFO,
+    format="%(asctime)s - %(message)s"
+)
 
+usersFile = "DatabaseAccounts.txt"
+usernameGreeter = "Hello"
 
 window = tink.Tk()
 window.title("Login Screen")
@@ -49,27 +62,37 @@ def save_user(username, password, is_admin=False):
     with open(usersFile, "a") as file:
         file.write(f"{username},{password},{is_admin}\n")
 
-#User storage
-#users = {} #need to add preset admin account
-
 #login method
 def login():
     username = username_entry.get()
     password = password_entry.get()
 
-    users = load_accounts()
+    conn = mysql.connector.connect(
+        host="localhost",
+        user="your_username",  # ← Replace with your MySQL username
+        password="your_password",  # ← Replace with your MySQL password
+        database="your_database"  # ← Replace with your DB name
+    )
+    cursor = conn.cursor()
 
-    if username in users and users[username]["password"] == password:
-        override_Auth(username, users[username]["is_admin"])
-        messagebox.showinfo("Login Success",f"Welcome, {username}!")
+    cursor.execute("SELECT user_id, is_admin FROM Sign_In_Information WHERE username = %s AND password = %s",
+                   (username, password))
+    result = cursor.fetchone()
 
+    if result:
+        user_id = result[0]  # Extract the user_id from the result
+        is_admin = result[1]  # Extract the is_admin value
+        override_Auth(user_id, is_admin)  # Store the user_id instead of username
+        messagebox.showinfo("Login Success", f"Welcome, {username}!")
+        global usernameGreeter
+        usernameGreeter = username
         window.destroy()
-
-        subprocess.Popen([sys.executable, "8bitLibrary.py"])
-
-    #will add a call to start main program
+        HomeScreen()
     else:
         messagebox.showerror("Login Failed", "Invalid username or password.")
+
+    cursor.close()
+    conn.close()
 
 #Account creation
 def create_user():
@@ -86,14 +109,109 @@ def create_user():
        save_user(username, password, is_admin = False)
        messagebox.showinfo("Account Created", "Account successfully created!")
 
-
-
-def override_Auth(username, is_admin):
+def override_Auth(user_id, is_admin):
     with open("auth.py", "w") as f:
-        f.write(f"username ={repr(username)}\n")
+        f.write(f"user_id = {repr(user_id)}\n")
         f.write(f"is_admin = {is_admin}\n")
 
+    logging.info(f"User Logged In: {user_id} (Admin: {is_admin})")
+def closeCommand(current_window):
+    with open("auth.py", "w") as f:
+        f.write(f"user_id = None\n")
+        f.write(f"is_admin = False\n")
 
+    if current_window.winfo_exists():
+        current_window.destroy()
+
+def adminCommand():
+    #messagebox.showinfo("Admin Option", "Wow you're cool, you have admin privileges!")
+    subprocess.Popen([sys.executable, "ViewTables.py"])
+
+def MemberView():
+    subprocess.Popen([sys.executable, "MemberView.py"])
+
+def BookSearch():
+    subprocess.Popen([sys.executable, "SearchBooks.py"])
+
+def CheckoutBook():
+    subprocess.Popen([sys.executable, "CheckoutBook.py"])
+
+def ReturnBook():
+    subprocess.Popen([sys.executable, "ReturnBook.py"])
+
+def greeting():
+    init_greeting = f"Welcome, {usernameGreeter}"
+    if auth.is_admin:
+        init_greeting += " (Admin)"
+
+    tink.Label(window, text=init_greeting, font=("Times New Roman", 14)).pack(pady=20)
+
+def HomeScreen():
+    # Frame For buttons example
+
+    window = tink.Tk()
+    window.title("8bitLibrary Test")
+    window.geometry("500x300")
+
+    importlib.reload(auth)
+
+    init_greeting = f"Welcome to the 8-bit-Library! {usernameGreeter}"
+    if auth.is_admin:
+        init_greeting += " (Admin)"
+
+    tink.Label(window, text=init_greeting, font=("Times New Roman", 14)).pack(pady=20)
+
+    b_frame = tink.Frame(window)
+    b_frame.pack(expand=True)
+
+
+
+    # makes buttons
+    b1 = tink.Button(b_frame, text='View Library', width=15, height=3, command = MemberView)
+    b2 = tink.Button(b_frame, text='Search By Name', width=15, height=3, command = BookSearch)
+    b3 = tink.Button(b_frame, text='Checkout Book', width=15, height=3, command = CheckoutBook)
+    b4 = tink.Button(b_frame, text='Book Return', width=15, height=3, command = ReturnBook)
+
+    # aligns buttons
+    b1.grid(row=0, column=0, padx=10, pady=10)
+    b2.grid(row=0, column=1, padx=10, pady=10)
+    b3.grid(row=1, column=0, padx=10, pady=10)
+    b4.grid(row=1, column=1, padx=10, pady=10)
+
+    # exit button resets auth.py
+    exit_button = tink.Button(window, text='Exit', command= lambda: closeCommand(window))
+    exit_button.pack(side="left", anchor="sw", padx=10, pady=10)
+
+    # admin button
+    if auth.is_admin:
+        admin_button = tink.Button(window, text='View All Tables', command=adminCommand)
+        admin_button.pack(side="right", anchor='se', padx=10, pady=10)
+
+def ViewTable():
+    cursor.execute("SHOW TABLES")
+    tables = cursor.fetchall()
+
+    root = tink.Tk()
+    root.title("MySQL Tables")
+
+    label = tink.Label(root, text="Tables in Database:")
+    label.pack()
+
+    listbox = tink.Listbox(root, width=50, height=20)
+    listbox.pack()
+
+    for table in tables:
+        listbox.insert(tink.END, table[0])
+    root.mainloop()
+
+
+conn = mysql.connector.connect(
+    host="localhost",
+    user="your_username",         # ← Replace with your MySQL username
+    password="your_password",     # ← Replace with your MySQL password
+    database="your_database"      # ← Replace with your DB name
+)
+cursor = conn.cursor()
 
 #Username entry and label
 tink.Label(window, text = "Username:").pack(pady = 5)
@@ -111,6 +229,3 @@ tink.Button(window, text = "Create Account", command = create_user).pack()
 
 #Starts the GUI
 window.mainloop()
-
-
-
