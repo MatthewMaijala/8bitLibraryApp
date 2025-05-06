@@ -5,6 +5,7 @@ from tkinter import ttk
 import auth
 import subprocess
 import sys
+import os
 import importlib
 import ViewTables
 import SearchBooks
@@ -13,6 +14,7 @@ import ReturnBook
 import MemberView
 import mysql.connector
 import logging
+import ManageBooks
 
 #----------------------------------------- Button test
 # #def update_label():
@@ -34,7 +36,7 @@ import logging
 
 #makes the window
 logging.basicConfig(
-    filename="user_activity.log",
+    filename=os.path.join(os.getcwd(), 'user_activity.log'),  # Adjusted to use the correct path
     level=logging.INFO,
     format="%(asctime)s - %(message)s"
 )
@@ -126,19 +128,19 @@ def closeCommand(current_window):
 
 def adminCommand():
     #messagebox.showinfo("Admin Option", "Wow you're cool, you have admin privileges!")
-    subprocess.Popen([sys.executable, "ViewTables.py"])
+    subprocess.Popen([sys.executable, get_script_path("ViewTables.py")])
 
 def MemberView():
-    subprocess.Popen([sys.executable, "MemberView.py"])
+    subprocess.Popen([sys.executable, get_script_path("MemberView.py")])
 
 def BookSearch():
-    subprocess.Popen([sys.executable, "SearchBooks.py"])
+    subprocess.Popen([sys.executable, get_script_path("SearchBooks.py")])
 
 def CheckoutBook():
-    subprocess.Popen([sys.executable, "CheckoutBook.py"])
+    subprocess.Popen([sys.executable, get_script_path("CheckoutBook.py")])
 
 def ReturnBook():
-    subprocess.Popen([sys.executable, "ReturnBook.py"])
+    subprocess.Popen([sys.executable, get_script_path("ReturnBook.py")])
 
 def greeting():
     init_greeting = f"Welcome, {usernameGreeter}"
@@ -148,7 +150,7 @@ def greeting():
     tink.Label(window, text=init_greeting, font=("Times New Roman", 14)).pack(pady=20)
 
 def ManageBooks():
-    subprocess.Popen([sys.executable, "ManageBooks.py"])
+    subprocess.Popen([sys.executable, get_script_path("ManageBooks.py")])
 
 def HomeScreen():
     # Frame For buttons example
@@ -211,6 +213,14 @@ def ViewTable():
         listbox.insert(tink.END, table[0])
     root.mainloop()
 
+def get_script_path(script_name):
+    """Returns the correct path for bundled or source code files."""
+    if hasattr(sys, '_MEIPASS'):
+        # If running as a bundled executable
+        return os.path.join(sys._MEIPASS, script_name)
+    else:
+        # If running from source
+        return os.path.join(os.getcwd(), script_name)
 
 conn = mysql.connector.connect(
     host = "localhost",
