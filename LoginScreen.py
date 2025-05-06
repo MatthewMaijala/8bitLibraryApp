@@ -69,9 +69,9 @@ def login():
 
     conn = mysql.connector.connect(
         host="localhost",
-        user="your_username",  # ← Replace with your MySQL username
-        password="your_password",  # ← Replace with your MySQL password
-        database="your_database"  # ← Replace with your DB name
+        user="root",
+        password="Rbs6^5%9(5%2@8*2@!@",
+        database="library_db"
     )
     cursor = conn.cursor()
 
@@ -115,6 +115,7 @@ def override_Auth(user_id, is_admin):
         f.write(f"is_admin = {is_admin}\n")
 
     logging.info(f"User Logged In: {user_id} (Admin: {is_admin})")
+
 def closeCommand(current_window):
     with open("auth.py", "w") as f:
         f.write(f"user_id = None\n")
@@ -145,6 +146,9 @@ def greeting():
         init_greeting += " (Admin)"
 
     tink.Label(window, text=init_greeting, font=("Times New Roman", 14)).pack(pady=20)
+
+def ManageBooks():
+    subprocess.Popen([sys.executable, "ManageBooks.py"])
 
 def HomeScreen():
     # Frame For buttons example
@@ -187,6 +191,9 @@ def HomeScreen():
         admin_button = tink.Button(window, text='View All Tables', command=adminCommand)
         admin_button.pack(side="right", anchor='se', padx=10, pady=10)
 
+        book_manage_button = tink.Button(window, text='Manage Books', command=ManageBooks)
+        book_manage_button.pack(side="bottom", padx=10, pady=10)
+
 def ViewTable():
     cursor.execute("SHOW TABLES")
     tables = cursor.fetchall()
@@ -206,10 +213,10 @@ def ViewTable():
 
 
 conn = mysql.connector.connect(
-    host="localhost",
-    user="your_username",         # ← Replace with your MySQL username
-    password="your_password",     # ← Replace with your MySQL password
-    database="your_database"      # ← Replace with your DB name
+    host = "localhost",
+    user = "root",
+    password="Rbs6^5%9(5%2@8*2@!@",
+    database = "library_db"
 )
 cursor = conn.cursor()
 
