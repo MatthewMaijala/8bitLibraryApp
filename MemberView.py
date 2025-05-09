@@ -7,10 +7,10 @@ ALLOWED_VIEWS = ["Books", "Genres", "Locations"]
 
 # Connect to MySQL
 conn = mysql.connector.connect(
-    host = "localhost",
-    user = "root",
-    password="Rbs6^5%9(5%2@8*2@!@",
-    database = "library_db"
+    host = "", # Add your host here
+    user = "", # Add your username here
+    password="", # Add your password here
+    database = "" # Add your database name here
 )
 cursor = conn.cursor()
 

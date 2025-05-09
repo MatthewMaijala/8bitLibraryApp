@@ -1,2 +1,2 @@
-user_id = None
-is_admin = False
+user_id = 1
+is_admin = 1
