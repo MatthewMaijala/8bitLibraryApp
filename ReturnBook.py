@@ -3,18 +3,37 @@ from tkinter import ttk, messagebox
 import mysql.connector
 from datetime import date
 import auth
+import sys
+import os
 
 # DB Connection
 conn = mysql.connector.connect(
-    host = "localhost",
-    user = "root",
-    password="Rbs6^5%9(5%2@8*2@!@",
-    database = "library_db"
+    host="localhost",
+    user="your_username",         # ← Replace with your MySQL username
+    password="your_password",     # ← Replace with your MySQL password
+    database="your_database"      # ← Replace with your DB name
 )
 cursor = conn.cursor()
 
+def get_auth_path():
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, 'auth.py')
+    else:
+        return os.path.join(os.getcwd(), 'auth.py')
+
+def read_auth():
+    auth_path = get_auth_path()
+    with open(auth_path, 'r') as f:
+        lines = f.readlines()
+        user_id = lines[0].strip().split('=')[1].strip()
+        is_admin = lines[1].strip().split('=')[1].strip()
+    return user_id
+
+
+
+
 # Hardcoded user
-USER_ID = auth.user_id
+USER_ID = read_auth()
 book_map = {}  # Maps listbox index to (book_id, transaction_id)
 
 def return_book():

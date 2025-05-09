@@ -36,7 +36,7 @@ import ManageBooks
 
 #makes the window
 logging.basicConfig(
-    filename=os.path.join(os.getcwd(), 'user_activity.log'),  # Adjusted to use the correct path
+    filename="user_activity.log",
     level=logging.INFO,
     format="%(asctime)s - %(message)s"
 )
@@ -71,9 +71,9 @@ def login():
 
     conn = mysql.connector.connect(
         host="localhost",
-        user="root",
-        password="Rbs6^5%9(5%2@8*2@!@",
-        database="library_db"
+        user="your_username",  # ← Replace with your MySQL username
+        password="your_password",  # ← Replace with your MySQL password
+        database="your_database"  # ← Replace with your DB name
     )
     cursor = conn.cursor()
 
@@ -129,6 +129,12 @@ def closeCommand(current_window):
 def adminCommand():
     #messagebox.showinfo("Admin Option", "Wow you're cool, you have admin privileges!")
     subprocess.Popen([sys.executable, get_script_path("ViewTables.py")])
+
+def get_auth_path():
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, 'auth.py')
+    else:
+        return os.path.join(os.getcwd(), 'auth.py')
 
 def MemberView():
     subprocess.Popen([sys.executable, get_script_path("MemberView.py")])
@@ -214,7 +220,7 @@ def ViewTable():
     root.mainloop()
 
 def get_script_path(script_name):
-    """Returns the correct path for bundled or source code files."""
+    #Returns the correct path for bundled or source code files.
     if hasattr(sys, '_MEIPASS'):
         # If running as a bundled executable
         return os.path.join(sys._MEIPASS, script_name)
@@ -222,11 +228,17 @@ def get_script_path(script_name):
         # If running from source
         return os.path.join(os.getcwd(), script_name)
 
+auth_path = get_auth_path()
+if not os.path.exists(auth_path):
+    with open(auth_path, "w") as f:
+        f.write("user_id = None\n")
+        f.write("is_admin = False\n")
+
 conn = mysql.connector.connect(
-    host = "localhost",
-    user = "root",
-    password="Rbs6^5%9(5%2@8*2@!@",
-    database = "library_db"
+    host="localhost",
+    user="your_username",         # ← Replace with your MySQL username
+    password="your_password",     # ← Replace with your MySQL password
+    database="your_database"      # ← Replace with your DB name
 )
 cursor = conn.cursor()
 

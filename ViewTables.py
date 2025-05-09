@@ -5,10 +5,10 @@ import mysql.connector
 
 # Connect to MySQL
 conn = mysql.connector.connect(
-    host = "localhost",
-    user = "root",
-    password="Rbs6^5%9(5%2@8*2@!@",
-    database = "library_db"
+    host="localhost",
+    user="your_username",         # ← Replace with your MySQL username
+    password="your_password",     # ← Replace with your MySQL password
+    database="your_database"      # ← Replace with your DB name
 )
 cursor = conn.cursor()
 
